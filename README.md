@@ -18,4 +18,35 @@ The core smart contract logic is implemented in Solidity and requires a low-fee 
 ## Project Structure
 - `contracts/`: Solidity smart contracts.
 - `scripts/`: Deployment and interaction scripts.
+- `test/`: Hardhat/Chai test suite.
 - `docs/`: Project documentation including product briefs, architecture, and task handoffs.
+
+## Developer Setup
+
+### Prerequisites
+- Node.js >= 18
+- npm
+
+### Installation
+Clone the repository and install dependencies:
+```bash
+npm install
+```
+
+### Compilation
+Compile the smart contracts using Hardhat:
+```bash
+npx hardhat compile
+```
+
+### Testing
+Run the comprehensive test suite:
+```bash
+npx hardhat test
+```
+
+### Simulation
+Run the interaction script to simulate an end-to-end borrowing lifecycle (depositing, borrowing, time-travel, and repaying) on a local Hardhat network:
+```bash
+npx hardhat run scripts/simulate.js
+```
