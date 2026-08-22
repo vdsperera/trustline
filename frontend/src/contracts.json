@@ -1,0 +1,906 @@
+{
+  "usdtAddress": "0x4687Da226d4Dc2c65a2317303A6582fc3fED1517",
+  "poolAddress": "0x18E93136f6cc76EbB8dEC0B552b958bab3851277",
+  "usdtAbi": [
+    {
+      "type": "constructor",
+      "stateMutability": "undefined",
+      "payable": false,
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ERC20InsufficientAllowance",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "spender"
+        },
+        {
+          "type": "uint256",
+          "name": "allowance"
+        },
+        {
+          "type": "uint256",
+          "name": "needed"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC20InsufficientBalance",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "sender"
+        },
+        {
+          "type": "uint256",
+          "name": "balance"
+        },
+        {
+          "type": "uint256",
+          "name": "needed"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC20InvalidApprover",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "approver"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC20InvalidReceiver",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "receiver"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC20InvalidSender",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "sender"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "ERC20InvalidSpender",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "spender"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "OwnableInvalidOwner",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "owner"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "OwnableUnauthorizedAccount",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "account"
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "Approval",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "owner",
+          "indexed": true
+        },
+        {
+          "type": "address",
+          "name": "spender",
+          "indexed": true
+        },
+        {
+          "type": "uint256",
+          "name": "value",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "OwnershipTransferred",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "previousOwner",
+          "indexed": true
+        },
+        {
+          "type": "address",
+          "name": "newOwner",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "Transfer",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "from",
+          "indexed": true
+        },
+        {
+          "type": "address",
+          "name": "to",
+          "indexed": true
+        },
+        {
+          "type": "uint256",
+          "name": "value",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "allowance",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "owner"
+        },
+        {
+          "type": "address",
+          "name": "spender"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "approve",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "spender"
+        },
+        {
+          "type": "uint256",
+          "name": "value"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "balanceOf",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "account"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "decimals",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "uint8",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "mint",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "to"
+        },
+        {
+          "type": "uint256",
+          "name": "amount"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "name",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "string",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "owner",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "address",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "renounceOwnership",
+      "constant": false,
+      "payable": false,
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "symbol",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "string",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "totalSupply",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "transfer",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "to"
+        },
+        {
+          "type": "uint256",
+          "name": "value"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "transferFrom",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "from"
+        },
+        {
+          "type": "address",
+          "name": "to"
+        },
+        {
+          "type": "uint256",
+          "name": "value"
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "transferOwnership",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "newOwner"
+        }
+      ],
+      "outputs": []
+    }
+  ],
+  "poolAbi": [
+    {
+      "type": "constructor",
+      "stateMutability": "undefined",
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "initialOwner"
+        },
+        {
+          "type": "address",
+          "name": "_usdtToken"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "EnforcedPause",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ExceedsMaxPoolSize",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "ExpectedPause",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InsufficientAllowance",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InsufficientAvailableLiquidity",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InsufficientLiquidity",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "InvalidAmount",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "LoanAlreadyActive",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NoActiveLoan",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "NotWhitelisted",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "OwnableInvalidOwner",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "owner"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "OwnableUnauthorizedAccount",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "account"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "SafeERC20FailedOperation",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "token"
+        }
+      ]
+    },
+    {
+      "type": "error",
+      "name": "TransferFailed",
+      "inputs": []
+    },
+    {
+      "type": "error",
+      "name": "Unauthorized",
+      "inputs": []
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "Borrowed",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "user",
+          "indexed": true
+        },
+        {
+          "type": "uint256",
+          "name": "amount",
+          "indexed": false
+        },
+        {
+          "type": "uint256",
+          "name": "interestRate",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "Deposited",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "user",
+          "indexed": true
+        },
+        {
+          "type": "uint256",
+          "name": "amount",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "InterestRateUpdated",
+      "inputs": [
+        {
+          "type": "uint256",
+          "name": "newRate",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "OwnershipTransferred",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "previousOwner",
+          "indexed": true
+        },
+        {
+          "type": "address",
+          "name": "newOwner",
+          "indexed": true
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "Paused",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "account",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "Repaid",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "user",
+          "indexed": true
+        },
+        {
+          "type": "uint256",
+          "name": "amount",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "Unpaused",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "account",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "WhitelistUpdated",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "user",
+          "indexed": true
+        },
+        {
+          "type": "bool",
+          "name": "isWhitelisted",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "event",
+      "anonymous": false,
+      "name": "Withdrawn",
+      "inputs": [
+        {
+          "type": "address",
+          "name": "user",
+          "indexed": true
+        },
+        {
+          "type": "uint256",
+          "name": "amount",
+          "indexed": false
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "MAX_POOL_SIZE",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "activeLoans",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": ""
+        }
+      ],
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": "principal"
+        },
+        {
+          "type": "uint256",
+          "name": "startTime"
+        },
+        {
+          "type": "uint256",
+          "name": "dailyInterestRate"
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "addToWhitelist",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "user"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "availableLiquidity",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "borrow",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "uint256",
+          "name": "amount"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "deposit",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "uint256",
+          "name": "amount"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "globalDailyInterestRate",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "owner",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "address",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "pause",
+      "constant": false,
+      "payable": false,
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "paused",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "bool",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "removeFromWhitelist",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "user"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "renounceOwnership",
+      "constant": false,
+      "payable": false,
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "repay",
+      "constant": false,
+      "payable": false,
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "setInterestRate",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "uint256",
+          "name": "dailyRate"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "totalHistoricalPoolSize",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "uint256",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "transferOwnership",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": "newOwner"
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "unpause",
+      "constant": false,
+      "payable": false,
+      "inputs": [],
+      "outputs": []
+    },
+    {
+      "type": "function",
+      "name": "usdtToken",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [],
+      "outputs": [
+        {
+          "type": "address",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "whitelist",
+      "constant": true,
+      "stateMutability": "view",
+      "payable": false,
+      "inputs": [
+        {
+          "type": "address",
+          "name": ""
+        }
+      ],
+      "outputs": [
+        {
+          "type": "bool",
+          "name": ""
+        }
+      ]
+    },
+    {
+      "type": "function",
+      "name": "withdraw",
+      "constant": false,
+      "payable": false,
+      "inputs": [
+        {
+          "type": "uint256",
+          "name": "amount"
+        }
+      ],
+      "outputs": []
+    }
+  ]
+}
