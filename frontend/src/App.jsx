@@ -17,6 +17,7 @@ function App() {
   const [activeLoan, setActiveLoan] = useState(null)
   
   const [whitelistAddress, setWhitelistAddress] = useState('')
+  const [borrowAmount, setBorrowAmount] = useState('5')
   
   // UX States
   const [loading, setLoading] = useState(false)
@@ -147,15 +148,16 @@ function App() {
   }
 
   const handleBorrow = async () => {
-    if (!poolContract) return
+    if (!poolContract || !borrowAmount) return
     try {
       setLoading(true)
       const decimals = await usdtContract.decimals()
-      const amount = ethers.parseUnits("5", decimals)
+      const amount = ethers.parseUnits(borrowAmount, decimals)
       const tx = await poolContract.borrow(amount)
       await tx.wait()
       await refreshData()
-      addToast("Successfully borrowed 5 USDT!")
+      addToast(`Successfully borrowed ${borrowAmount} USDT!`)
+      setBorrowAmount('5')
     } catch (e) {
       addToast(e.reason || e.message, 'error')
     } finally {
@@ -312,11 +314,24 @@ function App() {
                   </button>
                 </div>
               ) : (
-                <div style={{textAlign: 'center', padding: '2rem 0'}}>
-                  <h3 style={{fontSize: '2rem', marginBottom: '1.5rem'}}>Ready to borrow?</h3>
-                  <button className="btn" onClick={handleBorrow} disabled={loading} style={{padding: '1rem 2rem'}}>
-                    {loading ? <div className="spinner"></div> : "Borrow 5 USDT"}
-                  </button>
+                <div style={{textAlign: 'center', padding: '1rem 0'}}>
+                  <h3 style={{fontSize: '1.5rem', marginBottom: '1.5rem'}}>Request a Loan</h3>
+                  <div className="input-group" style={{maxWidth: '300px', margin: '0 auto'}}>
+                    <input 
+                      type="number" 
+                      min="0.1"
+                      step="0.1"
+                      placeholder="Amount (USDT)" 
+                      value={borrowAmount}
+                      onChange={(e) => setBorrowAmount(e.target.value)}
+                    />
+                    <button className="btn" onClick={handleBorrow} disabled={loading || !borrowAmount || Number(borrowAmount) <= 0 || Number(borrowAmount) > Number(poolLiquidity)}>
+                      {loading ? <div className="spinner"></div> : "Borrow"}
+                    </button>
+                  </div>
+                  <p style={{fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '1rem'}}>
+                    Max available: {poolLiquidity} USDT
+                  </p>
                 </div>
               )}
             </div>

@@ -2,6 +2,16 @@
 
 Trustline is an automated smart contract lending pool for managing small, short-term loans among a closed group of friends. 
 
+## UI Preview
+
+Check out the premium frontend built for this protocol, featuring role-based dashboards with real-time interest tracking and liquidity management:
+
+<div align="center">
+  <img src="docs/assets/admin_dashboard.png" alt="Admin Dashboard" width="45%" style="border-radius: 8px; margin-right: 2%;" />
+  <img src="docs/assets/borrower_dashboard.png" alt="Borrower Dashboard" width="45%" style="border-radius: 8px;" />
+</div>
+<br/>
+
 ## Problem It Solves
 Tracking who owes what, calculating interest, and managing repayments manually via bank transfers is tedious and error-prone. Trustline automates all accounting, enforces strict borrowing limits (you can't take a new loan if you already have an active one), and calculates daily interest autonomously.
 
