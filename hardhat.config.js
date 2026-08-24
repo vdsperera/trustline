@@ -1,6 +1,8 @@
 import { config as dotenvConfig } from "dotenv";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
+import "@nomicfoundation/hardhat-verify";
+
 
 dotenvConfig();
 
@@ -16,8 +18,6 @@ export default {
     }
   },
   etherscan: {
-    apiKey: {
-      baseSepolia: process.env.BASESCAN_API_KEY || ""
-    }
+    apiKey: process.env.BASESCAN_API_KEY || ""
   }
 };
