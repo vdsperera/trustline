@@ -96,7 +96,10 @@ function App() {
         setActiveLoan({
           principal: ethers.formatUnits(loan.principal, decimals),
           totalDebt: ethers.formatUnits(totalDebt, decimals),
-          startTime: new Date(Number(loan.startTime) * 1000).toLocaleString()
+          interestAccrued: ethers.formatUnits(interest, decimals),
+          interestRate: (Number(loan.dailyInterestRate) / 100).toFixed(2),
+          startTimeRaw: Number(loan.startTime) * 1000,
+          startTimeStr: new Date(Number(loan.startTime) * 1000).toLocaleString()
         })
       } else {
         setActiveLoan(null)
@@ -281,13 +284,29 @@ function App() {
                   <div className="grid">
                     <div className="stat">
                       <span className="stat-label">Principal Borrowed</span>
-                      <span className="stat-value danger">{activeLoan.principal} USDT</span>
+                      <span className="stat-value">{activeLoan.principal} USDT</span>
                     </div>
                     <div className="stat">
-                      <span className="stat-label">Total Debt (Incl. Interest)</span>
-                      <span className="stat-value danger">{activeLoan.totalDebt} USDT</span>
+                      <span className="stat-label">Interest Accrued ({activeLoan.interestRate}% Daily)</span>
+                      <span className="stat-value danger">+{activeLoan.interestAccrued} USDT</span>
                     </div>
                   </div>
+                  
+                  <div className="card highlight" style={{marginTop: '1rem', padding: '1rem'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem'}}>
+                      <span style={{color: 'var(--text-muted)'}}>Loan Started</span>
+                      <span>{activeLoan.startTimeStr}</span>
+                    </div>
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem'}}>
+                      <span style={{color: 'var(--text-muted)'}}>Time Elapsed</span>
+                      <span>{Math.floor((Date.now() - activeLoan.startTimeRaw) / (1000 * 60 * 60))} hours</span>
+                    </div>
+                    <div style={{display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.5rem', marginTop: '0.5rem'}}>
+                      <strong style={{fontSize: '1.2rem'}}>Total Debt</strong>
+                      <strong style={{fontSize: '1.2rem', color: 'var(--danger)'}}>{activeLoan.totalDebt} USDT</strong>
+                    </div>
+                  </div>
+
                   <button className="btn btn-danger" onClick={handleRepay} disabled={loading} style={{width: '100%', marginTop: '1rem'}}>
                     {loading ? <div className="spinner"></div> : "Repay Full Amount"}
                   </button>
