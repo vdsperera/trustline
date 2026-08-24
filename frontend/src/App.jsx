@@ -86,8 +86,13 @@ function App() {
       setUserBalance(ethers.formatUnits(bal, decimals))
       
       const loan = await _pool.activeLoans(_addr)
-      if (loan.active) {
-        const totalDebt = await _pool.calculateInterest(_addr)
+      if (loan.principal > 0n) {
+        // Calculate interest manually since there is no view function on the contract
+        const now = Math.floor(Date.now() / 1000)
+        const timeElapsed = BigInt(now) - loan.startTime
+        const interest = (loan.principal * loan.dailyInterestRate * timeElapsed) / 864000000n
+        const totalDebt = loan.principal + interest
+        
         setActiveLoan({
           principal: ethers.formatUnits(loan.principal, decimals),
           totalDebt: ethers.formatUnits(totalDebt, decimals),
@@ -159,9 +164,15 @@ function App() {
     if (!poolContract || !usdtContract) return
     try {
       setLoading(true)
-      const debt = await poolContract.calculateInterest(address)
+      const loan = await poolContract.activeLoans(address)
+      const now = Math.floor(Date.now() / 1000)
+      const timeElapsed = BigInt(now) - loan.startTime
+      const interest = (loan.principal * loan.dailyInterestRate * timeElapsed) / 864000000n
+      // Approve slightly more (5 minutes of extra interest) to ensure transaction doesn't fail while mining
+      const buffer = (loan.principal * loan.dailyInterestRate * 300n) / 864000000n
+      const maxApproval = loan.principal + interest + buffer
       
-      const tx1 = await usdtContract.approve(contractsData.poolAddress, debt)
+      const tx1 = await usdtContract.approve(contractsData.poolAddress, maxApproval)
       await tx1.wait()
       
       const tx2 = await poolContract.repay()

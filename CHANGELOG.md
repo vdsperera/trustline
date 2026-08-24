@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Added
+- **Premium Frontend UI**: Introduced a glassmorphism dark-mode UI for interacting with the Trustline Lending Pool.
+- **Role-Based Dashboards**: Distinct dashboards for Pool Owners (Admin controls) and Borrowers.
+- **Hardhat Check Script**: Added a CLI diagnostic script (`check-loan`) to query active loans directly from the blockchain via Hardhat Tasks.
+- **Etherscan V2 Support**: Upgraded `hardhat.config.js` to support the new Etherscan/Basescan V2 API for contract verification.
+
+### Fixed
+- **Frontend Active Loan Rendering**: Fixed a bug where the frontend failed to render active loans because it checked for a non-existent `loan.active` boolean instead of checking if `loan.principal > 0`.
+- **Frontend Interest Calculation**: Replicated the smart contract's simple interest calculation logic in the frontend (`App.jsx`), as the smart contract did not expose a view function for it. Added a 5-minute buffer to USDT approvals to prevent repayment reverts.
+
 ## [1.0.0] - 2026-08-20
 
 ### Added
