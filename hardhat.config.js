@@ -15,6 +15,10 @@ export default {
     base_sepolia: {
       url: process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
       accounts: [PRIVATE_KEY]
+    },
+    base: {
+      url: process.env.BASE_MAINNET_RPC_URL || "https://mainnet.base.org",
+      accounts: [PRIVATE_KEY]
     }
   },
   etherscan: {

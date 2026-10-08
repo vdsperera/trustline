@@ -4,15 +4,27 @@ async function main() {
   const [deployer] = await hre.ethers.getSigners();
   console.log(`Deploying with account: ${deployer.address}`);
 
-  // Deploy MockUSDT for testnet usage
-  const MockUSDT = await hre.ethers.getContractFactory("MockUSDT");
-  const usdt = await MockUSDT.deploy();
-  await usdt.waitForDeployment();
-  console.log(`Mock USDT deployed to: ${usdt.target}`);
+  let usdtAddress;
 
-  // Deploy TrustlineLendingPool using the MockUSDT address
+  if (hre.network.name === "base") {
+    // Mainnet deployment: Use the real USDT address from environment
+    usdtAddress = process.env.USDT_ADDRESS;
+    if (!usdtAddress || usdtAddress === "0x..." || usdtAddress === "") {
+      throw new Error("Missing USDT_ADDRESS in environment for mainnet deployment");
+    }
+    console.log(`Using real USDT at: ${usdtAddress}`);
+  } else {
+    // Testnet / Local deployment: Deploy MockUSDT
+    const MockUSDT = await hre.ethers.getContractFactory("MockUSDT");
+    const usdt = await MockUSDT.deploy();
+    await usdt.waitForDeployment();
+    usdtAddress = usdt.target;
+    console.log(`Mock USDT deployed to: ${usdtAddress}`);
+  }
+
+  // Deploy TrustlineLendingPool using the determined USDT address
   const TrustlineLendingPool = await hre.ethers.getContractFactory("TrustlineLendingPool");
-  const pool = await TrustlineLendingPool.deploy(deployer.address, usdt.target);
+  const pool = await TrustlineLendingPool.deploy(deployer.address, usdtAddress);
 
   await pool.waitForDeployment();
 
