@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import './index.css'
+import abis from './abis.json'
 
 function App() {
   const [provider, setProvider] = useState(null)
@@ -24,11 +25,17 @@ function App() {
   const [toasts, setToasts] = useState([])
 
   useEffect(() => {
-    // Load contract data
-    fetch('/src/contracts.json')
-      .then(res => res.json())
-      .then(data => setContractsData(data))
-      .catch(e => console.error('Contracts JSON not found. Deploy contracts first!', e))
+    // Load contract data from Env and static ABI
+    if (import.meta.env.VITE_POOL_ADDRESS && import.meta.env.VITE_USDT_ADDRESS) {
+      setContractsData({
+        poolAddress: import.meta.env.VITE_POOL_ADDRESS,
+        usdtAddress: import.meta.env.VITE_USDT_ADDRESS,
+        poolAbi: abis.poolAbi,
+        usdtAbi: abis.usdtAbi
+      })
+    } else {
+      console.error('Environment variables for contract addresses are missing!')
+    }
   }, [])
 
   const addToast = (message, type = 'success') => {
