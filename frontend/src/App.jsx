@@ -3,6 +3,28 @@ import { ethers } from 'ethers'
 import './index.css'
 import abis from './abis.json'
 
+const parseError = (e) => {
+  console.error("Transaction Error:", e);
+  let errorMsg = e.reason || e.message || "An unknown error occurred";
+  
+  if (e?.info?.error?.message) {
+    errorMsg = e.info.error.message;
+  } else if (e?.data?.message) {
+    errorMsg = e.data.message;
+  } else if (typeof e.message === 'string' && e.message.includes('execution reverted:')) {
+    const match = e.message.match(/execution reverted: (.*?)(?:",|$)/);
+    if (match && match[1]) {
+        errorMsg = match[1];
+    }
+  }
+  
+  if (errorMsg.startsWith("execution reverted: ")) {
+    errorMsg = errorMsg.replace("execution reverted: ", "");
+  }
+  
+  return errorMsg;
+}
+
 function App() {
   const [provider, setProvider] = useState(null)
   const [signer, setSigner] = useState(null)
@@ -133,7 +155,7 @@ function App() {
       await refreshData()
       addToast("Successfully deposited 20 USDT!")
     } catch (e) {
-      addToast(e.reason || e.message, 'error')
+      addToast(parseError(e), 'error')
     } finally {
       setLoading(false)
     }
@@ -148,7 +170,7 @@ function App() {
       addToast(`Address whitelisted!`)
       setWhitelistAddress('')
     } catch (e) {
-      addToast(e.reason || e.message, 'error')
+      addToast(parseError(e), 'error')
     } finally {
       setLoading(false)
     }
@@ -166,7 +188,7 @@ function App() {
       addToast(`Successfully borrowed ${borrowAmount} USDT!`)
       setBorrowAmount('5')
     } catch (e) {
-      addToast(e.reason || e.message, 'error')
+      addToast(parseError(e), 'error')
     } finally {
       setLoading(false)
     }
@@ -193,7 +215,7 @@ function App() {
       await refreshData()
       addToast("Loan successfully repaid!")
     } catch (e) {
-      addToast(e.reason || e.message, 'error')
+      addToast(parseError(e), 'error')
     } finally {
       setLoading(false)
     }
