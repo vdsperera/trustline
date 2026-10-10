@@ -2,28 +2,7 @@ import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import './index.css'
 import abis from './abis.json'
-
-const parseError = (e) => {
-  console.error("Transaction Error:", e);
-  let errorMsg = e.reason || e.message || "An unknown error occurred";
-  
-  if (e?.info?.error?.message) {
-    errorMsg = e.info.error.message;
-  } else if (e?.data?.message) {
-    errorMsg = e.data.message;
-  } else if (typeof e.message === 'string' && e.message.includes('execution reverted:')) {
-    const match = e.message.match(/execution reverted: (.*?)(?:",|$)/);
-    if (match && match[1]) {
-        errorMsg = match[1];
-    }
-  }
-  
-  if (errorMsg.startsWith("execution reverted: ")) {
-    errorMsg = errorMsg.replace("execution reverted: ", "");
-  }
-  
-  return errorMsg;
-}
+import { parseError } from './utils.js'
 
 function App() {
   const [provider, setProvider] = useState(null)
