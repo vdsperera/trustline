@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import './index.css'
 import abis from './abis.json'
+import { parseError } from './utils.js'
 
 function App() {
   const [provider, setProvider] = useState(null)
@@ -133,7 +134,7 @@ function App() {
       await refreshData()
       addToast("Successfully deposited 20 USDT!")
     } catch (e) {
-      addToast(e.reason || e.message, 'error')
+      addToast(parseError(e), 'error')
     } finally {
       setLoading(false)
     }
@@ -148,7 +149,7 @@ function App() {
       addToast(`Address whitelisted!`)
       setWhitelistAddress('')
     } catch (e) {
-      addToast(e.reason || e.message, 'error')
+      addToast(parseError(e), 'error')
     } finally {
       setLoading(false)
     }
@@ -166,7 +167,7 @@ function App() {
       addToast(`Successfully borrowed ${borrowAmount} USDT!`)
       setBorrowAmount('5')
     } catch (e) {
-      addToast(e.reason || e.message, 'error')
+      addToast(parseError(e), 'error')
     } finally {
       setLoading(false)
     }
@@ -193,7 +194,7 @@ function App() {
       await refreshData()
       addToast("Loan successfully repaid!")
     } catch (e) {
-      addToast(e.reason || e.message, 'error')
+      addToast(parseError(e), 'error')
     } finally {
       setLoading(false)
     }
