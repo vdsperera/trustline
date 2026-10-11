@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import './index.css'
 import abis from './abis.json'
-import { parseError } from './utils.js'
+import { parseError, calculateRemainingCapacity, validateDepositAmount } from './utils.js'
 
 function App() {
   const [provider, setProvider] = useState(null)
@@ -20,6 +20,8 @@ function App() {
   
   const [whitelistAddress, setWhitelistAddress] = useState('')
   const [borrowAmount, setBorrowAmount] = useState('5')
+  const [depositAmount, setDepositAmount] = useState('20')
+  const [remainingDepositCapacity, setRemainingDepositCapacity] = useState('20')
   
   // UX States
   const [loading, setLoading] = useState(false)
@@ -93,6 +95,15 @@ function App() {
       
       const bal = await _usdt.balanceOf(_addr)
       setUserBalance(ethers.formatUnits(bal, decimals))
+
+      try {
+        const maxPool = await _pool.MAX_POOL_SIZE()
+        const totalHistorical = await _pool.totalHistoricalPoolSize()
+        const remaining = calculateRemainingCapacity(maxPool, totalHistorical)
+        setRemainingDepositCapacity(ethers.formatUnits(remaining, decimals))
+      } catch (err) {
+        console.error("Could not fetch pool capacity:", err)
+      }
       
       const loan = await _pool.activeLoans(_addr)
       if (loan.principal > 0n) {
@@ -119,11 +130,16 @@ function App() {
   }
 
   const handleDeposit = async () => {
-    if (!usdtContract || !poolContract) return
+    if (!usdtContract || !poolContract || !depositAmount) return
     try {
       setLoading(true)
-      const decimals = await usdtContract.decimals()
-      const amount = ethers.parseUnits("20", decimals)
+      const validation = validateDepositAmount(depositAmount, remainingDepositCapacity)
+      if (!validation.valid) {
+        addToast(validation.error, 'error')
+        return
+      }
+
+      const amount = ethers.parseUnits(depositAmount, decimals)
       
       const tx1 = await usdtContract.approve(contractsData.poolAddress, amount)
       await tx1.wait()
@@ -132,7 +148,7 @@ function App() {
       await tx2.wait()
       
       await refreshData()
-      addToast("Successfully deposited 20 USDT!")
+      addToast(`Successfully deposited ${depositAmount} USDT!`)
     } catch (e) {
       addToast(parseError(e), 'error')
     } finally {
@@ -261,9 +277,44 @@ function App() {
               <div className="grid">
                 <div>
                   <h3 style={{marginBottom: '1rem', fontSize: '1rem', color: 'var(--text-muted)'}}>Liquidity Management</h3>
-                  <button className="btn" onClick={handleDeposit} disabled={loading} style={{width: '100%'}}>
-                    {loading ? <div className="spinner"></div> : "Deposit 20 USDT"}
-                  </button>
+                  <div className="input-group">
+                    <input 
+                      type="number" 
+                      min="0.1"
+                      step="0.1"
+                      placeholder="Amount (USDT)" 
+                      value={depositAmount}
+                      onChange={(e) => setDepositAmount(e.target.value)}
+                    />
+                    <button 
+                      className="btn btn-secondary" 
+                      type="button"
+                      onClick={() => setDepositAmount(remainingDepositCapacity)}
+                      disabled={loading || Number(remainingDepositCapacity) <= 0}
+                      title="Set to max remaining capacity"
+                      style={{padding: '0 0.8rem', fontSize: '0.85rem'}}
+                    >
+                      Max
+                    </button>
+                    <button 
+                      className="btn" 
+                      onClick={handleDeposit} 
+                      disabled={
+                        loading || 
+                        !depositAmount || 
+                        Number(depositAmount) <= 0 || 
+                        (Number(remainingDepositCapacity) > 0 && Number(depositAmount) > Number(remainingDepositCapacity)) ||
+                        Number(remainingDepositCapacity) <= 0
+                      }
+                    >
+                      {loading ? <div className="spinner"></div> : "Deposit"}
+                    </button>
+                  </div>
+                  <p style={{fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.5rem'}}>
+                    {Number(remainingDepositCapacity) <= 0 
+                      ? "Pool is at maximum capacity (20 USDT)" 
+                      : `Remaining deposit capacity: ${remainingDepositCapacity} USDT`}
+                  </p>
                 </div>
                 
                 <div>
