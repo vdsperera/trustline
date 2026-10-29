@@ -288,12 +288,11 @@ function App() {
                       onChange={(e) => setDepositAmount(e.target.value)}
                     />
                     <button 
-                      className="btn btn-secondary" 
+                      className="btn btn-secondary btn-max" 
                       type="button"
                       onClick={() => setDepositAmount(remainingDepositCapacity)}
                       disabled={loading || Number(remainingDepositCapacity) <= 0}
                       title="Set to max remaining capacity"
-                      style={{padding: '0 0.8rem', fontSize: '0.85rem'}}
                     >
                       Max
                     </button>
