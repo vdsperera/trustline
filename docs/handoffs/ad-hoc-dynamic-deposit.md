@@ -15,7 +15,7 @@ In the original frontend implementation, the Admin Dashboard had a hardcoded dep
 2. **Frontend State & Contract Queries (`frontend/src/App.jsx`)**:
    - Added `depositAmount` and `remainingDepositCapacity` state hooks.
    - In `refreshData`, queries `_pool.MAX_POOL_SIZE()` and `_pool.totalHistoricalPoolSize()` to update remaining deposit headroom.
-   - Updated `handleDeposit` to validate the entered amount and approve/deposit the specified amount.
+   - Updated `handleDeposit` to validate the entered amount, dynamically query token `decimals()`, and approve/deposit the specified amount.
 3. **Interactive UI (`frontend/src/App.jsx` & `frontend/src/index.css`)**:
    - Replaced static button with a number input (`step="0.1"`, `min="0.1"`).
    - Added a "Max" button styled with `.btn-secondary` to auto-fill the remaining capacity.

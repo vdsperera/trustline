@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - **Etherscan V2 Support**: Upgraded `hardhat.config.js` to support the new Etherscan/Basescan V2 API for contract verification.
 
 ### Fixed
+- **Deposit Undefined Decimals Error**: Fixed a runtime `ReferenceError: decimals is not defined` in `handleDeposit` by dynamically querying the token contract's `decimals()` before converting deposit amounts with `ethers.parseUnits`.
 - **Admin Deposit Exceeds Max Pool Revert**: Fixed an issue where the frontend prevented the owner from topping up a partially filled pool by always attempting to deposit a hardcoded 20 USDT.
 - **Frontend Active Loan Rendering**: Fixed a bug where the frontend failed to render active loans because it checked for a non-existent `loan.active` boolean instead of checking if `loan.principal > 0`.
 - **Frontend Interest Calculation**: Replicated the smart contract's simple interest calculation logic in the frontend (`App.jsx`), as the smart contract did not expose a view function for it. Added a 5-minute buffer to USDT approvals to prevent repayment reverts.

@@ -139,6 +139,7 @@ function App() {
         return
       }
 
+      const decimals = await usdtContract.decimals()
       const amount = ethers.parseUnits(depositAmount, decimals)
       
       const tx1 = await usdtContract.approve(contractsData.poolAddress, amount)
