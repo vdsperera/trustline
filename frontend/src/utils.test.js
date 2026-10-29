@@ -7,7 +7,7 @@ test('parseError - extracts from basic e.message', () => {
     assert.strictEqual(parseError(error), "ERC20: transfer amount exceeds balance");
 });
 
-test('parseError - extracts from nested e.info.error.message', () => {
+test('parseError - decodes ExceedsMaxPoolSize into a user-friendly message', () => {
     const error = {
         message: "something else",
         info: {
@@ -16,27 +16,42 @@ test('parseError - extracts from nested e.info.error.message', () => {
             }
         }
     };
-    assert.strictEqual(parseError(error), "ExceedsMaxPoolSize()");
+    assert.strictEqual(parseError(error), "This deposit would exceed the 20 USDT pool cap.");
 });
 
-test('parseError - extracts from nested e.data.message', () => {
+test('parseError - decodes InvalidAmount into a user-friendly message', () => {
     const error = {
         message: "something else",
         data: {
             message: "execution reverted: InvalidAmount()"
         }
     };
-    assert.strictEqual(parseError(error), "InvalidAmount()");
+    assert.strictEqual(parseError(error), "The specified amount is invalid. It must be greater than 0.");
 });
 
-test('parseError - extracts stringified message with extra quotes', () => {
+test('parseError - decodes ASCII custom error selector XJy8 as NotWhitelisted', () => {
+    const error = { message: "Internal JSON-RPC error: XJy8" };
+    assert.strictEqual(parseError(error), "You are not whitelisted to borrow. Please ask the pool owner to add your address.");
+});
+
+test('parseError - decodes hex 4-byte selector 0x584a7938 as NotWhitelisted', () => {
+    const error = { data: "0x584a7938" };
+    assert.strictEqual(parseError(error), "You are not whitelisted to borrow. Please ask the pool owner to add your address.");
+});
+
+test('parseError - decodes user rejection in wallet', () => {
+    const error = { code: 4001, message: "User rejected the request." };
+    assert.strictEqual(parseError(error), "Transaction rejected in wallet.");
+});
+
+test('parseError - extracts stringified message with extra quotes for unknown reverts', () => {
     const error = { message: 'execution reverted: ERC20: transfer amount exceeds balance", data: "0x08c...' };
     assert.strictEqual(parseError(error), "ERC20: transfer amount exceeds balance");
 });
 
 test('parseError - falls back to e.reason if present and no deeply nested object', () => {
-    const error = { reason: "User rejected transaction" };
-    assert.strictEqual(parseError(error), "User rejected transaction");
+    const error = { reason: "Some network reason" };
+    assert.strictEqual(parseError(error), "Some network reason");
 });
 
 test('parseError - returns default if nothing is provided', () => {

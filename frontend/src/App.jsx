@@ -151,7 +151,7 @@ function App() {
       await refreshData()
       addToast(`Successfully deposited ${depositAmount} USDT!`)
     } catch (e) {
-      addToast(parseError(e), 'error')
+      addToast(parseError(e, poolContract?.interface), 'error')
     } finally {
       setLoading(false)
     }
@@ -166,7 +166,7 @@ function App() {
       addToast(`Address whitelisted!`)
       setWhitelistAddress('')
     } catch (e) {
-      addToast(parseError(e), 'error')
+      addToast(parseError(e, poolContract?.interface), 'error')
     } finally {
       setLoading(false)
     }
@@ -184,7 +184,7 @@ function App() {
       addToast(`Successfully borrowed ${borrowAmount} USDT!`)
       setBorrowAmount('5')
     } catch (e) {
-      addToast(parseError(e), 'error')
+      addToast(parseError(e, poolContract?.interface), 'error')
     } finally {
       setLoading(false)
     }
@@ -211,7 +211,7 @@ function App() {
       await refreshData()
       addToast("Loan successfully repaid!")
     } catch (e) {
-      addToast(parseError(e), 'error')
+      addToast(parseError(e, poolContract?.interface), 'error')
     } finally {
       setLoading(false)
     }
