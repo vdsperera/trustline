@@ -9,8 +9,8 @@ async function main() {
     process.exit(1);
   }
 
-  // The address you deployed the pool to on Base Sepolia
-  const poolAddress = "0x18E93136f6cc76EbB8dEC0B552b958bab3851277";
+  // Pool address (defaults to Base Sepolia testnet address if not provided)
+  const poolAddress = process.env.POOL_ADDRESS || "0x18E93136f6cc76EbB8dEC0B552b958bab3851277";
 
   console.log(`Connecting to TrustlineLendingPool at ${poolAddress}...`);
   
@@ -23,11 +23,21 @@ async function main() {
   // Read from the blockchain
   const loan = await pool.activeLoans(borrowerAddress);
 
+  // Query token decimals from the lending pool's configured USDT token
+  let decimals = 6;
+  try {
+    const usdtAddress = await pool.usdtToken();
+    const tokenContract = await hre.ethers.getContractAt(["function decimals() view returns (uint8)"], usdtAddress);
+    decimals = await tokenContract.decimals();
+  } catch {
+    decimals = 6;
+  }
+
   if (loan.principal == 0n) {
     console.log("\n❌ No active loan found for this address on the blockchain.");
   } else {
     console.log("\n✅ Active Loan Found!");
-    console.log(`Principal: ${hre.ethers.formatUnits(loan.principal, 18)} USDT`);
+    console.log(`Principal: ${hre.ethers.formatUnits(loan.principal, decimals)} USDT`);
     console.log(`Start Time: ${new Date(Number(loan.startTime) * 1000).toLocaleString()}`);
     console.log(`Interest Rate: ${loan.dailyInterestRate} basis points (2%)`);
   }
