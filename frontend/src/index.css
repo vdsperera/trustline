@@ -155,11 +155,20 @@ h2 {
   flex-shrink: 0;
 }
 
+.btn-add-friend {
+  width: 100%;
+  padding: 0.75rem 1rem;
+}
+
 /* Grid & Layout */
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 2rem;
+}
+
+.grid > * {
+  min-width: 0;
 }
 
 /* Stats */
@@ -541,6 +550,13 @@ input:focus {
 }
 
 /* Responsive Design */
+@media (max-width: 820px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1.5rem 1rem;

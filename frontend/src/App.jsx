@@ -567,7 +567,7 @@ function App() {
                 
                 <div>
                   <h3 style={{marginBottom: '1rem', fontSize: '1rem', color: 'var(--text-muted)'}}>Add Whitelisted Friend</h3>
-                  <div className="input-group">
+                  <div className="input-group" style={{marginBottom: '0.65rem'}}>
                     <input 
                       type="text" 
                       placeholder="Friend Name / Alias (e.g. Kasun)" 
@@ -575,17 +575,21 @@ function App() {
                       onChange={(e) => setWhitelistName(e.target.value)}
                     />
                   </div>
-                  <div className="input-group">
+                  <div className="input-group" style={{marginBottom: '0.65rem'}}>
                     <input 
                       type="text" 
                       placeholder="Wallet address (0x...)" 
                       value={whitelistAddress}
                       onChange={(e) => setWhitelistAddress(e.target.value)}
                     />
-                    <button className="btn" onClick={handleWhitelistAdd} disabled={loading || !whitelistAddress}>
-                      {loading ? <div className="spinner"></div> : "Add"}
-                    </button>
                   </div>
+                  <button 
+                    className="btn btn-add-friend" 
+                    onClick={handleWhitelistAdd} 
+                    disabled={loading || !whitelistAddress}
+                  >
+                    {loading ? <div className="spinner"></div> : "+ Add to Whitelist"}
+                  </button>
                 </div>
               </div>
 
