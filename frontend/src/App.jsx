@@ -33,6 +33,22 @@ function App() {
   const [depositAmount, setDepositAmount] = useState('20')
   const [remainingDepositCapacity, setRemainingDepositCapacity] = useState('20')
   
+  // Exchange Rate State (defaults to 333.14 LKR/USDT)
+  const [lkrRate, setLkrRate] = useState(() => {
+    try {
+      return localStorage.getItem('trustline_lkr_rate') || '333.14'
+    } catch {
+      return '333.14'
+    }
+  })
+  const [rateInput, setRateInput] = useState(() => {
+    try {
+      return localStorage.getItem('trustline_lkr_rate') || '333.14'
+    } catch {
+      return '333.14'
+    }
+  })
+  
   // UX States
   const [loading, setLoading] = useState(false)
   const [toasts, setToasts] = useState([])
@@ -357,6 +373,23 @@ function App() {
     addToast("Removed from directory")
   }
 
+  const handleSaveRate = () => {
+    const num = parseFloat(rateInput)
+    if (!num || isNaN(num) || num <= 0) {
+      addToast("Please enter a valid positive exchange rate", 'error')
+      return
+    }
+    const formatted = num.toFixed(2)
+    setLkrRate(formatted)
+    setRateInput(formatted)
+    try {
+      localStorage.setItem('trustline_lkr_rate', formatted)
+    } catch (e) {
+      console.error("Failed to save rate to localStorage:", e)
+    }
+    addToast(`Exchange rate updated to 1 USDT = ${formatted} LKR`)
+  }
+
   const handleBorrow = async () => {
     if (!poolContract || !borrowAmount) return
     try {
@@ -443,6 +476,9 @@ function App() {
               <div className="stat">
                 <span className="stat-label">USDT Balance</span>
                 <span className="stat-value">{userBalance}</span>
+                <span className="sub-lkr" style={{marginTop: '0.25rem'}}>
+                  ≈ LKR {Math.round(Number(userBalance) * Number(lkrRate)).toLocaleString()}
+                </span>
               </div>
             </div>
             
@@ -451,14 +487,41 @@ function App() {
               <div className="stat">
                 <span className="stat-label">Available to Borrow</span>
                 <span className="stat-value highlight">{poolLiquidity}</span>
+                <span className="sub-lkr" style={{marginTop: '0.25rem'}}>
+                  ≈ LKR {Math.round(Number(poolLiquidity) * Number(lkrRate)).toLocaleString()}
+                </span>
               </div>
             </div>
           </div>
 
           {isOwner ? (
             <div className="card highlight">
-              <h2>Admin Dashboard</h2>
-              <p style={{color: 'var(--text-muted)', marginBottom: '1.5rem'}}>You are connected as the pool owner.</p>
+              <div className="admin-header-row">
+                <div>
+                  <h2>Admin Dashboard</h2>
+                  <p style={{color: 'var(--text-muted)', marginBottom: '0.5rem'}}>You are connected as the pool owner.</p>
+                </div>
+                <div className="rate-setting-bar">
+                  <span className="rate-label">Rate: 1 USDT =</span>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    min="1" 
+                    value={rateInput}
+                    onChange={(e) => setRateInput(e.target.value)}
+                    className="rate-input"
+                    placeholder="333.14"
+                  />
+                  <span className="rate-currency">LKR</span>
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={handleSaveRate}
+                    disabled={!rateInput || Number(rateInput) <= 0 || rateInput === lkrRate}
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
               
               <div className="grid">
                 <div>
@@ -621,7 +684,7 @@ function App() {
                                   <span className="loan-detail-label">Total Debt Owed</span>
                                   <span className="loan-detail-value highlight-debt">
                                     {details.totalDebt} USDT 
-                                    <span className="sub-lkr"> (≈ LKR {Math.round(Number(details.totalDebt) * 305).toLocaleString()})</span>
+                                    <span className="sub-lkr"> (≈ LKR {Math.round(Number(details.totalDebt) * Number(lkrRate)).toLocaleString()})</span>
                                   </span>
                                 </div>
                                 <div className="loan-detail-item">
@@ -669,9 +732,14 @@ function App() {
                       <span style={{color: 'var(--text-muted)'}}>Time Elapsed</span>
                       <span>{Math.floor((Date.now() - activeLoan.startTimeRaw) / (1000 * 60 * 60))} hours</span>
                     </div>
-                    <div style={{display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.5rem', marginTop: '0.5rem'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.5rem', marginTop: '0.5rem'}}>
                       <strong style={{fontSize: '1.2rem'}}>Total Debt</strong>
-                      <strong style={{fontSize: '1.2rem', color: 'var(--danger)'}}>{activeLoan.totalDebt} USDT</strong>
+                      <div style={{textAlign: 'right'}}>
+                        <strong style={{fontSize: '1.2rem', color: 'var(--danger)'}}>{activeLoan.totalDebt} USDT</strong>
+                        <div className="sub-lkr" style={{fontSize: '0.85rem'}}>
+                          ≈ LKR {Math.round(Number(activeLoan.totalDebt) * Number(lkrRate)).toLocaleString()}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
