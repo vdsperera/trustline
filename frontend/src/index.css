@@ -324,19 +324,80 @@ input:focus {
 
 .friend-card {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border);
   border-radius: 0.875rem;
   padding: 0.85rem 1.25rem;
-  gap: 1rem;
+  gap: 0.85rem;
   transition: all 0.2s ease;
 }
 
 .friend-card:hover {
   border-color: rgba(139, 92, 246, 0.35);
   background: rgba(0, 0, 0, 0.35);
+}
+
+.friend-card-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.friend-loan-details {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  width: 100%;
+}
+
+.loan-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.loan-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.loan-detail-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.loan-detail-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.loan-detail-value.danger {
+  color: var(--danger);
+}
+
+.loan-detail-value.highlight-debt {
+  color: #a78bfa;
+}
+
+.loan-detail-value.muted {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.sub-lkr {
+  font-size: 0.8rem;
+  color: #34d399;
+  font-weight: 500;
 }
 
 .friend-info {
@@ -523,10 +584,19 @@ input:focus {
   }
 
   .friend-card {
-    flex-direction: column;
-    align-items: flex-start;
     padding: 0.85rem 1rem;
     gap: 0.75rem;
+  }
+
+  .friend-card-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .loan-detail-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem 0.5rem;
   }
 
   .friend-actions {

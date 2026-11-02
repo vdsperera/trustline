@@ -182,11 +182,33 @@ function App() {
             try {
               const isW = await _pool.whitelist(friend.address)
               const fLoan = await _pool.activeLoans(friend.address)
-              detailsMap[lower] = {
+              const hasActiveLoan = fLoan.principal > 0n
+              
+              let loanDetails = {
                 isWhitelisted: isW,
-                hasActiveLoan: fLoan.principal > 0n,
-                principal: ethers.formatUnits(fLoan.principal, decimals)
+                hasActiveLoan
               }
+
+              if (hasActiveLoan) {
+                const now = Math.floor(Date.now() / 1000)
+                const timeElapsed = BigInt(now) - fLoan.startTime
+                const interest = (fLoan.principal * fLoan.dailyInterestRate * timeElapsed) / 864000000n
+                const totalDebt = fLoan.principal + interest
+                const hours = Math.floor(Number(timeElapsed) / 3600)
+                const days = (hours / 24).toFixed(1)
+
+                loanDetails = {
+                  ...loanDetails,
+                  principal: ethers.formatUnits(fLoan.principal, decimals),
+                  interestAccrued: ethers.formatUnits(interest, decimals),
+                  totalDebt: ethers.formatUnits(totalDebt, decimals),
+                  interestRate: (Number(fLoan.dailyInterestRate) / 100).toFixed(2),
+                  startTimeStr: new Date(Number(fLoan.startTime) * 1000).toLocaleString(),
+                  durationStr: hours >= 24 ? `${days} days (${hours}h)` : `${hours} hours`
+                }
+              }
+
+              detailsMap[lower] = loanDetails
               mergedFriends.push({
                 name: friend.name || `Friend (${friend.address.slice(0, 6)}...${friend.address.slice(-4)})`,
                 rawName: friend.rawName || '',
@@ -521,67 +543,96 @@ function App() {
                       const details = friendsDetails[friend.address.toLowerCase()] || {}
                       const isWhitelistedOnChain = details.isWhitelisted
                       const hasActiveLoan = details.hasActiveLoan
-                      const principal = details.principal
 
                       return (
                         <div key={friend.address} className="friend-card">
-                          <div className="friend-info">
-                            <div className="friend-header">
-                              <span className="friend-name">{friend.name}</span>
-                              <button 
-                                className="btn-icon-inline"
-                                onClick={() => handleRenameContact(friend.address, friend.name)}
-                                title="Edit nickname"
-                                type="button"
-                              >
-                                ✏️
-                              </button>
-                              {isWhitelistedOnChain ? (
-                                <span className="badge-status badge-active">Whitelisted</span>
-                              ) : (
-                                <span className="badge-status badge-inactive">Not Whitelisted</span>
-                              )}
-                              {hasActiveLoan && (
-                                <span className="badge-status badge-loan">Active Loan: {principal} USDT</span>
-                              )}
+                          <div className="friend-card-main">
+                            <div className="friend-info">
+                              <div className="friend-header">
+                                <span className="friend-name">{friend.name}</span>
+                                <button 
+                                  className="btn-icon-inline"
+                                  onClick={() => handleRenameContact(friend.address, friend.name)}
+                                  title="Edit nickname"
+                                  type="button"
+                                >
+                                  ✏️
+                                </button>
+                                {isWhitelistedOnChain ? (
+                                  <span className="badge-status badge-active">Whitelisted</span>
+                                ) : (
+                                  <span className="badge-status badge-inactive">Not Whitelisted</span>
+                                )}
+                                {hasActiveLoan && (
+                                  <span className="badge-status badge-loan">Active Loan: {details.principal} USDT</span>
+                                )}
+                              </div>
+                              <div className="friend-address" title={friend.address}>
+                                <code>{friend.address.slice(0, 8)}...{friend.address.slice(-6)}</code>
+                              </div>
                             </div>
-                            <div className="friend-address" title={friend.address}>
-                              <code>{friend.address.slice(0, 8)}...{friend.address.slice(-6)}</code>
+
+                            <div className="friend-actions">
+                              {isWhitelistedOnChain ? (
+                                <button 
+                                  className="btn btn-secondary btn-sm btn-danger-outline" 
+                                  onClick={() => handleWhitelistRemove(friend.address, friend.name)}
+                                  disabled={loading}
+                                  title="Revoke borrowing permission on-chain"
+                                >
+                                  Revoke
+                                </button>
+                              ) : (
+                                <button 
+                                  className="btn btn-secondary btn-sm" 
+                                  onClick={() => {
+                                    setWhitelistName(friend.rawName || (friend.name.startsWith("Friend (") ? "" : friend.name))
+                                    setWhitelistAddress(friend.address)
+                                  }}
+                                  disabled={loading}
+                                  title="Fill into form to re-add on-chain"
+                                >
+                                  Re-add
+                                </button>
+                              )}
+                              <button 
+                                className="btn btn-secondary btn-sm"
+                                style={{padding: '0.45rem 0.7rem'}}
+                                onClick={() => handleDeleteContact(friend.address, isWhitelistedOnChain)}
+                                title="Delete from local directory"
+                              >
+                                ✕
+                              </button>
                             </div>
                           </div>
 
-                          <div className="friend-actions">
-                            {isWhitelistedOnChain ? (
-                              <button 
-                                className="btn btn-secondary btn-sm btn-danger-outline" 
-                                onClick={() => handleWhitelistRemove(friend.address, friend.name)}
-                                disabled={loading}
-                                title="Revoke borrowing permission on-chain"
-                              >
-                                Revoke
-                              </button>
-                            ) : (
-                              <button 
-                                className="btn btn-secondary btn-sm" 
-                                onClick={() => {
-                                  setWhitelistName(friend.rawName || (friend.name.startsWith("Friend (") ? "" : friend.name))
-                                  setWhitelistAddress(friend.address)
-                                }}
-                                disabled={loading}
-                                title="Fill into form to re-add on-chain"
-                              >
-                                Re-add
-                              </button>
-                            )}
-                            <button 
-                              className="btn btn-secondary btn-sm"
-                              style={{padding: '0.45rem 0.7rem'}}
-                              onClick={() => handleDeleteContact(friend.address, isWhitelistedOnChain)}
-                              title="Delete from local directory"
-                            >
-                              ✕
-                            </button>
-                          </div>
+                          {hasActiveLoan && (
+                            <div className="friend-loan-details">
+                              <div className="loan-detail-grid">
+                                <div className="loan-detail-item">
+                                  <span className="loan-detail-label">Principal</span>
+                                  <span className="loan-detail-value">{details.principal} USDT</span>
+                                </div>
+                                <div className="loan-detail-item">
+                                  <span className="loan-detail-label">Interest ({details.interestRate}% Daily)</span>
+                                  <span className="loan-detail-value danger">+{details.interestAccrued} USDT</span>
+                                </div>
+                                <div className="loan-detail-item">
+                                  <span className="loan-detail-label">Total Debt Owed</span>
+                                  <span className="loan-detail-value highlight-debt">
+                                    {details.totalDebt} USDT 
+                                    <span className="sub-lkr"> (≈ LKR {Math.round(Number(details.totalDebt) * 305).toLocaleString()})</span>
+                                  </span>
+                                </div>
+                                <div className="loan-detail-item">
+                                  <span className="loan-detail-label">Loan Duration</span>
+                                  <span className="loan-detail-value muted" title={details.startTimeStr}>
+                                    {details.durationStr}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )
                     })}
