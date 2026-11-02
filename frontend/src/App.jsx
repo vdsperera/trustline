@@ -19,6 +19,16 @@ function App() {
   const [activeLoan, setActiveLoan] = useState(null)
   
   const [whitelistAddress, setWhitelistAddress] = useState('')
+  const [whitelistName, setWhitelistName] = useState('')
+  const [whitelistedFriends, setWhitelistedFriends] = useState(() => {
+    try {
+      const saved = localStorage.getItem('trustline_whitelisted_friends')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
+  const [friendsDetails, setFriendsDetails] = useState({})
   const [borrowAmount, setBorrowAmount] = useState('5')
   const [depositAmount, setDepositAmount] = useState('20')
   const [remainingDepositCapacity, setRemainingDepositCapacity] = useState('20')
@@ -70,9 +80,10 @@ function App() {
           setUsdtContract(_usdt)
           
           const ownerAddr = await _pool.owner()
-          setIsOwner(ownerAddr.toLowerCase() === _address.toLowerCase())
+          const isCurrentOwner = ownerAddr.toLowerCase() === _address.toLowerCase()
+          setIsOwner(isCurrentOwner)
           
-          await refreshData(_pool, _usdt, _address)
+          await refreshData(_pool, _usdt, _address, isCurrentOwner)
           addToast("Wallet connected successfully!")
         }
       } catch (error) {
@@ -85,7 +96,7 @@ function App() {
     }
   }
 
-  const refreshData = async (_pool = poolContract, _usdt = usdtContract, _addr = address) => {
+  const refreshData = async (_pool = poolContract, _usdt = usdtContract, _addr = address, _isOwner = isOwner) => {
     if (!_pool || !_usdt || !_addr) return
     try {
       const liq = await _pool.availableLiquidity()
@@ -124,6 +135,34 @@ function App() {
       } else {
         setActiveLoan(null)
       }
+
+      // Check on-chain status of friends in directory if owner
+      if (_isOwner) {
+        try {
+          const saved = JSON.parse(localStorage.getItem('trustline_whitelisted_friends') || '[]')
+          if (saved.length > 0) {
+            const detailsMap = {}
+            for (const friend of saved) {
+              if (friend.address && ethers.isAddress(friend.address)) {
+                try {
+                  const isW = await _pool.whitelist(friend.address)
+                  const fLoan = await _pool.activeLoans(friend.address)
+                  detailsMap[friend.address.toLowerCase()] = {
+                    isWhitelisted: isW,
+                    hasActiveLoan: fLoan.principal > 0n,
+                    principal: ethers.formatUnits(fLoan.principal, decimals)
+                  }
+                } catch {
+                  // Ignore per-address lookup error
+                }
+              }
+            }
+            setFriendsDetails(detailsMap)
+          }
+        } catch {
+          // Ignore JSON parse error
+        }
+      }
     } catch (e) {
       console.error(e)
     }
@@ -157,19 +196,71 @@ function App() {
     }
   }
 
-  const handleWhitelist = async () => {
+  const handleWhitelistAdd = async (e) => {
+    if (e && e.preventDefault) e.preventDefault()
     if (!poolContract || !whitelistAddress) return
+    const cleanAddr = whitelistAddress.trim()
+    if (!ethers.isAddress(cleanAddr)) {
+      addToast("Please enter a valid wallet address", 'error')
+      return
+    }
+    const cleanName = whitelistName.trim() || 'Friend'
+
     try {
       setLoading(true)
-      const tx = await poolContract.addToWhitelist(whitelistAddress)
+      const tx = await poolContract.addToWhitelist(cleanAddr)
       await tx.wait()
-      addToast(`Address whitelisted!`)
+
+      const existingIdx = whitelistedFriends.findIndex(f => f.address.toLowerCase() === cleanAddr.toLowerCase())
+      let updated
+      if (existingIdx >= 0) {
+        updated = [...whitelistedFriends]
+        updated[existingIdx] = { ...updated[existingIdx], name: cleanName }
+      } else {
+        updated = [...whitelistedFriends, { name: cleanName, address: cleanAddr }]
+      }
+      setWhitelistedFriends(updated)
+      try {
+        localStorage.setItem('trustline_whitelisted_friends', JSON.stringify(updated))
+      } catch (err) {
+        console.error("Failed to save to localStorage:", err)
+      }
+
       setWhitelistAddress('')
+      setWhitelistName('')
+      await refreshData()
+      addToast(`${cleanName} (${cleanAddr.slice(0, 6)}...${cleanAddr.slice(-4)}) added to whitelist!`)
     } catch (e) {
       addToast(parseError(e, poolContract?.interface), 'error')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleWhitelistRemove = async (targetAddress, friendName) => {
+    if (!poolContract || !targetAddress) return
+    try {
+      setLoading(true)
+      const tx = await poolContract.removeFromWhitelist(targetAddress)
+      await tx.wait()
+      await refreshData()
+      addToast(`${friendName || 'Friend'} removed from whitelist!`)
+    } catch (e) {
+      addToast(parseError(e, poolContract?.interface), 'error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteContact = (targetAddress) => {
+    const updated = whitelistedFriends.filter(f => f.address.toLowerCase() !== targetAddress.toLowerCase())
+    setWhitelistedFriends(updated)
+    try {
+      localStorage.setItem('trustline_whitelisted_friends', JSON.stringify(updated))
+    } catch (err) {
+      console.error("Failed to update localStorage:", err)
+    }
+    addToast("Contact deleted from directory")
   }
 
   const handleBorrow = async () => {
@@ -318,19 +409,104 @@ function App() {
                 </div>
                 
                 <div>
-                  <h3 style={{marginBottom: '1rem', fontSize: '1rem', color: 'var(--text-muted)'}}>Access Control</h3>
+                  <h3 style={{marginBottom: '1rem', fontSize: '1rem', color: 'var(--text-muted)'}}>Add Whitelisted Friend</h3>
                   <div className="input-group">
                     <input 
                       type="text" 
-                      placeholder="Enter wallet address (0x...)" 
+                      placeholder="Friend Name / Alias (e.g. Kasun)" 
+                      value={whitelistName}
+                      onChange={(e) => setWhitelistName(e.target.value)}
+                    />
+                  </div>
+                  <div className="input-group">
+                    <input 
+                      type="text" 
+                      placeholder="Wallet address (0x...)" 
                       value={whitelistAddress}
                       onChange={(e) => setWhitelistAddress(e.target.value)}
                     />
-                    <button className="btn" onClick={handleWhitelist} disabled={loading || !whitelistAddress}>
+                    <button className="btn" onClick={handleWhitelistAdd} disabled={loading || !whitelistAddress}>
                       {loading ? <div className="spinner"></div> : "Add"}
                     </button>
                   </div>
                 </div>
+              </div>
+
+              <div className="friends-directory">
+                <div className="friends-directory-header">
+                  <h3 style={{fontSize: '1rem', color: 'var(--text-muted)'}}>
+                    Whitelisted Friends Directory ({whitelistedFriends.length})
+                  </h3>
+                </div>
+
+                {whitelistedFriends.length === 0 ? (
+                  <p style={{color: 'var(--text-muted)', fontSize: '0.875rem', fontStyle: 'italic', margin: '0.5rem 0'}}>
+                    No friends in directory yet. Add a friend's name and address above to track and grant borrowing permissions.
+                  </p>
+                ) : (
+                  <div className="friends-list">
+                    {whitelistedFriends.map((friend) => {
+                      const details = friendsDetails[friend.address.toLowerCase()] || {}
+                      const isWhitelistedOnChain = details.isWhitelisted
+                      const hasActiveLoan = details.hasActiveLoan
+                      const principal = details.principal
+
+                      return (
+                        <div key={friend.address} className="friend-card">
+                          <div className="friend-info">
+                            <div className="friend-header">
+                              <span className="friend-name">{friend.name}</span>
+                              {isWhitelistedOnChain ? (
+                                <span className="badge-status badge-active">Whitelisted</span>
+                              ) : (
+                                <span className="badge-status badge-inactive">Not Whitelisted</span>
+                              )}
+                              {hasActiveLoan && (
+                                <span className="badge-status badge-loan">Active Loan: {principal} USDT</span>
+                              )}
+                            </div>
+                            <div className="friend-address" title={friend.address}>
+                              <code>{friend.address.slice(0, 8)}...{friend.address.slice(-6)}</code>
+                            </div>
+                          </div>
+
+                          <div className="friend-actions">
+                            {isWhitelistedOnChain ? (
+                              <button 
+                                className="btn btn-secondary btn-sm btn-danger-outline" 
+                                onClick={() => handleWhitelistRemove(friend.address, friend.name)}
+                                disabled={loading}
+                                title="Revoke borrowing permission on-chain"
+                              >
+                                Revoke
+                              </button>
+                            ) : (
+                              <button 
+                                className="btn btn-secondary btn-sm" 
+                                onClick={() => {
+                                  setWhitelistName(friend.name)
+                                  setWhitelistAddress(friend.address)
+                                }}
+                                disabled={loading}
+                                title="Fill into form to re-add on-chain"
+                              >
+                                Re-add
+                              </button>
+                            )}
+                            <button 
+                              className="btn btn-secondary btn-sm"
+                              style={{padding: '0.45rem 0.7rem'}}
+                              onClick={() => handleDeleteContact(friend.address)}
+                              title="Delete from local directory"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           ) : (
