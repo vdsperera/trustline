@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - **Etherscan V2 Support**: Upgraded `hardhat.config.js` to support the new Etherscan/Basescan V2 API for contract verification.
 
 ### Fixed
+- **Admin Whitelist Form & Grid Containment**: Redesigned the "Add Whitelisted Friend" form into a clean stacked layout with full-width friend name and wallet address inputs and a full-width submission button. Updated the CSS grid with `minmax(0, 1fr)` column tracks and child `min-width: 0` containment to eliminate input/button overflow on intermediate screen sizes, and added a responsive `@media (max-width: 820px)` collapse to a single-column layout.
 - **Mobile UI & Input Group Layout Overflow**: Resolved button overflow on mobile viewports by adding `min-width: 0` to inputs, responsive wrapping for `.input-group` on viewports under 520px, and dedicated `.btn-max` responsive styling.
 - **Friendly Custom Error Decoding**: Upgraded `parseError` in `frontend/src/utils.js` to decode EVM custom errors (e.g. `NotWhitelisted`, selector `0x584a7938` / ASCII `"XJy8"`, `InsufficientLiquidity`, `LoanAlreadyActive`) into plain English guidance instead of showing raw error codes.
 - **Deposit Undefined Decimals Error**: Fixed a runtime `ReferenceError: decimals is not defined` in `handleDeposit` by dynamically querying the token contract's `decimals()` before converting deposit amounts with `ethers.parseUnits`.
