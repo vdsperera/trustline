@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **On-Chain Whitelist Discovery & Inline Alias Management**: Automatically scans historical `WhitelistUpdated` blockchain events on wallet connection to discover all previously whitelisted friends regardless of device or cleared cache. Added inline nickname editing (✏️) to label any discovered address.
 - **Whitelisted Friends Directory & Access Control Management**: Added support for attaching friend aliases/nicknames to wallet addresses (stored locally for 0-gas overhead), a live directory of whitelisted borrowers with real-time on-chain active loan tracking, and single-click revocation via the smart contract's `removeFromWhitelist` function.
 - **Premium Frontend UI**: Introduced a glassmorphism dark-mode UI for interacting with the Trustline Lending Pool.
 - **Role-Based Dashboards**: Distinct dashboards for Pool Owners (Admin controls) and Borrowers.

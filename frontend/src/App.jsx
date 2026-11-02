@@ -139,28 +139,68 @@ function App() {
       // Check on-chain status of friends in directory if owner
       if (_isOwner) {
         try {
+          // 1. Load saved friends/aliases from localStorage
           const saved = JSON.parse(localStorage.getItem('trustline_whitelisted_friends') || '[]')
-          if (saved.length > 0) {
-            const detailsMap = {}
-            for (const friend of saved) {
-              if (friend.address && ethers.isAddress(friend.address)) {
-                try {
-                  const isW = await _pool.whitelist(friend.address)
-                  const fLoan = await _pool.activeLoans(friend.address)
-                  detailsMap[friend.address.toLowerCase()] = {
-                    isWhitelisted: isW,
-                    hasActiveLoan: fLoan.principal > 0n,
-                    principal: ethers.formatUnits(fLoan.principal, decimals)
-                  }
-                } catch {
-                  // Ignore per-address lookup error
+          const addressMap = new Map()
+
+          for (const item of saved) {
+            if (item.address && ethers.isAddress(item.address)) {
+              addressMap.set(item.address.toLowerCase(), {
+                name: item.name || '',
+                rawName: item.name || '',
+                address: ethers.getAddress(item.address)
+              })
+            }
+          }
+
+          // 2. Query historical on-chain WhitelistUpdated events
+          try {
+            const filter = _pool.filters.WhitelistUpdated()
+            const logs = await _pool.queryFilter(filter, 0)
+            for (const log of logs) {
+              const uAddr = log.args?.user
+              if (uAddr && ethers.isAddress(uAddr)) {
+                const lower = uAddr.toLowerCase()
+                if (!addressMap.has(lower)) {
+                  addressMap.set(lower, {
+                    name: `Friend (${uAddr.slice(0, 6)}...${uAddr.slice(-4)})`,
+                    rawName: '',
+                    address: ethers.getAddress(uAddr)
+                  })
                 }
               }
             }
-            setFriendsDetails(detailsMap)
+          } catch (eventErr) {
+            console.warn("Could not query historical WhitelistUpdated events:", eventErr)
           }
-        } catch {
-          // Ignore JSON parse error
+
+          // 3. Check live on-chain status & loan for all discovered addresses
+          const detailsMap = {}
+          const mergedFriends = []
+
+          for (const [lower, friend] of addressMap.entries()) {
+            try {
+              const isW = await _pool.whitelist(friend.address)
+              const fLoan = await _pool.activeLoans(friend.address)
+              detailsMap[lower] = {
+                isWhitelisted: isW,
+                hasActiveLoan: fLoan.principal > 0n,
+                principal: ethers.formatUnits(fLoan.principal, decimals)
+              }
+              mergedFriends.push({
+                name: friend.name || `Friend (${friend.address.slice(0, 6)}...${friend.address.slice(-4)})`,
+                rawName: friend.rawName || '',
+                address: friend.address
+              })
+            } catch (err) {
+              console.error("Failed to query status for", friend.address, err)
+            }
+          }
+
+          setWhitelistedFriends(mergedFriends)
+          setFriendsDetails(detailsMap)
+        } catch (err) {
+          console.error("Failed to refresh whitelisted friends:", err)
         }
       }
     } catch (e) {
@@ -204,7 +244,7 @@ function App() {
       addToast("Please enter a valid wallet address", 'error')
       return
     }
-    const cleanName = whitelistName.trim() || 'Friend'
+    const cleanName = whitelistName.trim() || `Friend (${cleanAddr.slice(0, 6)}...${cleanAddr.slice(-4)})`
 
     try {
       setLoading(true)
@@ -215,13 +255,15 @@ function App() {
       let updated
       if (existingIdx >= 0) {
         updated = [...whitelistedFriends]
-        updated[existingIdx] = { ...updated[existingIdx], name: cleanName }
+        updated[existingIdx] = { ...updated[existingIdx], name: cleanName, rawName: whitelistName.trim() }
       } else {
-        updated = [...whitelistedFriends, { name: cleanName, address: cleanAddr }]
+        updated = [...whitelistedFriends, { name: cleanName, rawName: whitelistName.trim(), address: cleanAddr }]
       }
       setWhitelistedFriends(updated)
       try {
-        localStorage.setItem('trustline_whitelisted_friends', JSON.stringify(updated))
+        localStorage.setItem('trustline_whitelisted_friends', JSON.stringify(
+          updated.map(f => ({ name: f.rawName || f.name, address: f.address }))
+        ))
       } catch (err) {
         console.error("Failed to save to localStorage:", err)
       }
@@ -229,7 +271,7 @@ function App() {
       setWhitelistAddress('')
       setWhitelistName('')
       await refreshData()
-      addToast(`${cleanName} (${cleanAddr.slice(0, 6)}...${cleanAddr.slice(-4)}) added to whitelist!`)
+      addToast(`${cleanName} whitelisted successfully!`)
     } catch (e) {
       addToast(parseError(e, poolContract?.interface), 'error')
     } finally {
@@ -252,15 +294,45 @@ function App() {
     }
   }
 
-  const handleDeleteContact = (targetAddress) => {
+  const handleRenameContact = (targetAddress, currentName) => {
+    const defaultVal = currentName.startsWith("Friend (") ? "" : currentName
+    const newName = window.prompt("Enter a nickname for this friend:", defaultVal)
+    if (newName === null) return
+    const trimmed = newName.trim()
+    const displayName = trimmed || `Friend (${targetAddress.slice(0, 6)}...${targetAddress.slice(-4)})`
+
+    const updated = whitelistedFriends.map(f => 
+      f.address.toLowerCase() === targetAddress.toLowerCase() 
+        ? { ...f, name: displayName, rawName: trimmed }
+        : f
+    )
+    setWhitelistedFriends(updated)
+
+    try {
+      localStorage.setItem('trustline_whitelisted_friends', JSON.stringify(
+        updated.map(f => ({ name: f.rawName || f.name, address: f.address }))
+      ))
+    } catch (err) {
+      console.error("Failed to save renamed friend to localStorage:", err)
+    }
+    addToast(`Updated nickname to "${displayName}"`)
+  }
+
+  const handleDeleteContact = (targetAddress, isWhitelistedOnChain) => {
+    if (isWhitelistedOnChain) {
+      addToast("Address is still active on-chain. Click 'Revoke' first to remove permissions.", 'error')
+      return
+    }
     const updated = whitelistedFriends.filter(f => f.address.toLowerCase() !== targetAddress.toLowerCase())
     setWhitelistedFriends(updated)
     try {
-      localStorage.setItem('trustline_whitelisted_friends', JSON.stringify(updated))
+      localStorage.setItem('trustline_whitelisted_friends', JSON.stringify(
+        updated.map(f => ({ name: f.rawName || f.name, address: f.address }))
+      ))
     } catch (err) {
       console.error("Failed to update localStorage:", err)
     }
-    addToast("Contact deleted from directory")
+    addToast("Removed from directory")
   }
 
   const handleBorrow = async () => {
@@ -456,6 +528,14 @@ function App() {
                           <div className="friend-info">
                             <div className="friend-header">
                               <span className="friend-name">{friend.name}</span>
+                              <button 
+                                className="btn-icon-inline"
+                                onClick={() => handleRenameContact(friend.address, friend.name)}
+                                title="Edit nickname"
+                                type="button"
+                              >
+                                ✏️
+                              </button>
                               {isWhitelistedOnChain ? (
                                 <span className="badge-status badge-active">Whitelisted</span>
                               ) : (
@@ -484,7 +564,7 @@ function App() {
                               <button 
                                 className="btn btn-secondary btn-sm" 
                                 onClick={() => {
-                                  setWhitelistName(friend.name)
+                                  setWhitelistName(friend.rawName || (friend.name.startsWith("Friend (") ? "" : friend.name))
                                   setWhitelistAddress(friend.address)
                                 }}
                                 disabled={loading}
@@ -496,7 +576,7 @@ function App() {
                             <button 
                               className="btn btn-secondary btn-sm"
                               style={{padding: '0.45rem 0.7rem'}}
-                              onClick={() => handleDeleteContact(friend.address)}
+                              onClick={() => handleDeleteContact(friend.address, isWhitelistedOnChain)}
                               title="Delete from local directory"
                             >
                               ✕
