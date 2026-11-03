@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- **Two-Step Ownership Transfer (Ownable2Step)**: Upgraded `TrustlineLendingPool` to inherit OpenZeppelin's `Ownable2Step` instead of standard `Ownable`. Ownership transfers now require the nominated recipient to call `acceptOwnership()`, preventing accidental loss of contract ownership and admin controls from mistyped wallet addresses.
 - **Configurable USDT/LKR Rate (Default 333.14)**: Added a customizable exchange rate setting in the Admin Dashboard (defaulting to 333.14 LKR/USDT based on actual P2P transaction rates), dynamically updating Sri Lankan Rupee equivalents across all wallet balances, pool liquidity, and active borrower debt.
 - **Admin Active Loan Breakdown & LKR Equivalent**: Display comprehensive loan analytics in the Admin Directory for friends with active loans, including principal, accrued interest, total debt owed (with dynamic LKR conversion), and loan duration.
 - **On-Chain Whitelist Discovery & Inline Alias Management**: Automatically scans historical `WhitelistUpdated` blockchain events on wallet connection to discover all previously whitelisted friends regardless of device or cleared cache. Added inline nickname editing (✏️) to label any discovered address.
