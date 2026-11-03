@@ -16,10 +16,14 @@ Check out the premium frontend built for this protocol, featuring role-based das
 Tracking who owes what, calculating interest, and managing repayments manually via bank transfers is tedious and error-prone. Trustline automates all accounting, enforces strict borrowing limits (you can't take a new loan if you already have an active one), and calculates daily interest autonomously.
 
 ## Features
-- **Whitelist Management**: Only pre-approved friend wallets can participate in borrowing.
+- **Whitelisted Friends Directory & Access Control**: Named borrower management with zero gas overhead, automatic on-chain discovery of whitelisted wallets via historical `WhitelistUpdated` events, inline nickname editing (`✏️`), and single-click revocation.
+- **Admin Active Loan Analytics**: Pool owners can view active loans per friend in real time, including principal, accrued interest, total debt, duration, and Sri Lankan Rupee equivalents directly in the directory.
+- **Configurable USDT/LKR Exchange Rate**: Customizable exchange rate editor in the Admin Dashboard (defaulting to 333.14 LKR/USDT based on actual P2P market rates), updating Rupee conversions across wallet balances, pool liquidity, and borrower debt.
 - **Dynamic Liquidity Management & Headroom Capacity**: The pool owner can deposit arbitrary amounts up to the 20 USDT pool cap, with a one-click "Max" fill option.
 - **Automated Real-Time Interest**: 2% daily simple interest calculation pro-rated per second, computed autonomously and displayed in real-time.
 - **Single-Transaction Repayment**: Borrowers repay the full principal + accrued interest in a single transaction (with a 5-minute interest buffer to prevent repayment reverts while mining).
+- **Mobile-Optimized & WebView Resilient**: Responsive glassmorphism interface with decimal input handling hardened against mobile virtual keyboard and Web3 wallet in-app browser lockups (MetaMask, Coinbase Wallet).
+- **Human-Readable Error Decoding**: Automatically decodes 4-byte EVM custom error selectors (`0x584a7938`, `ExceedsMaxPoolSize`, etc.) into clear, actionable notifications.
 - **Dual-Network Ready**: The same frontend codebase seamlessly runs on both **Base Sepolia (testnet)** and **Base Mainnet** via environment variables.
 - **Uncollateralized**: Relies on real-world social trust, rather than collateral.
 

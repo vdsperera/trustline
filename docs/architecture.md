@@ -32,6 +32,20 @@
 - **Scaling strategy**: Handled by L2 network.
 - **Failure mode**: Reverts on insufficient balance or allowance.
 
+### Component 4: Trustline Frontend Application
+- **Name**: Trustline Frontend (`frontend/src/`)
+- **Responsibility**: Provides role-based user interfaces (Pool Owner vs Whitelisted Borrower), handles wallet connections, visualizes real-time interest and Rupee conversions, discovers whitelisted peers, and decodes EVM revert errors.
+- **Exposes**:
+  - `parseError(e, iface)`: Decodes 4-byte EVM custom error selectors (`0x584a7938`, `ExceedsMaxPoolSize`, etc.) into user-friendly strings.
+  - `calculateRemainingCapacity(maxPool, totalHistorical)`: Computes headroom available for deposits up to the 20 USDT cap.
+  - `validateDepositAmount(amount, remainingCapacity)`: Enforces deposit headroom constraints prior to wallet submission.
+  - `isValidNumericInput(value)`: Sanitizes numeric input without triggering mobile software keyboard locks.
+- **Depends on**: `TrustlineLendingPool` (Smart Contract), `USDT` (ERC20 Contract), Browser Web3 Provider (EIP-1193).
+- **Data owned**: Local contact nicknames (`localStorage`), customizable USDT/LKR exchange rate (`localStorage`).
+- **Technology**: React 18, Vite, Ethers.js v6, CSS Glassmorphic design tokens.
+- **Scaling strategy**: Static client distribution (Vercel/Netlify/IPFS).
+- **Failure mode**: Displays non-blocking glassmorphic toast notifications; falls back to standard input behavior if local storage is restricted.
+
 ---
 
 ## 2. API Contracts (Smart Contract Interface)
@@ -161,3 +175,35 @@
 2. Require full exact repayment in a single transaction.
 **Decision:** Require full repayment via a single `repay()` function that uses `transferFrom` to pull the exact calculated amount (principal + accrued interest).
 **Consequences:** Drastically simplifies contract logic and state. Prevents "dust" loans. If a user approves a higher amount than needed, the contract still only pulls the exact debt, ensuring safety.
+
+### ID: ADR-004
+**Title:** Hybrid On-Chain Whitelist Discovery with Client-Side Alias Persistence
+**Status:** Accepted
+**Context:** Storing human-readable friend nicknames on-chain consumes unnecessary gas and storage, while storing addresses purely in `localStorage` loses the directory across multiple devices or cleared browser caches.
+**Options considered:**
+1. Store `string name` on-chain inside the contract (high gas cost per add/edit).
+2. Rely solely on client-side `localStorage` (loses track of friends when switching devices or clearing browser data).
+3. Hybrid approach: query historical `WhitelistUpdated` events from the blockchain on wallet connection, and merge with client-side nickname mappings.
+**Decision:** Implement the hybrid approach. The frontend scans `WhitelistUpdated` events from block 0 to construct the source of truth for whitelisted addresses, while user-defined nicknames are stored in `localStorage` with inline renaming controls.
+**Consequences:** 0-gas overhead for nickname management; 100% address persistence across devices and browser sessions.
+
+### ID: ADR-005
+**Title:** Text-Based Decimal Input over HTML5 Number Input for Mobile WebViews
+**Status:** Accepted
+**Context:** Mobile wallet in-app browsers (MetaMask Mobile, Coinbase Wallet) lock up virtual keyboards and refuse to backspace or type when `<input type="number">` is combined with React controlled state and `min`/`step` constraints.
+**Options considered:**
+1. Standard `<input type="number">` with native spinners.
+2. Custom virtual keypad rendered in HTML/React.
+3. `<input type="text" inputMode="decimal" autoComplete="off">` combined with client-side numeric regex validation.
+**Decision:** Use `type="text"` with `inputMode="decimal"` and a clean regex sanitizer (`isValidNumericInput`).
+**Consequences:** Triggers the native mobile decimal keypad without triggering the browser's C++ number parser or WebView virtual keyboard desynchronization bugs. Allows smooth backspacing and empty input states.
+
+### ID: ADR-006
+**Title:** Client-Side Simple Interest Mirroring with Repayment Allowance Buffer
+**Status:** Accepted
+**Context:** The smart contract calculates simple interest on the fly during `repay()` but does not expose a read-only view function for accrued interest.
+**Options considered:**
+1. Upgrade the smart contract to add an `accumulatedDebt(address)` view function.
+2. Mirror the simple interest formula in the frontend (`Principal * Rate * TimeElapsed / SECONDS_IN_DAY`) and add a 5-minute interest buffer to the USDT approval before calling `repay()`.
+**Decision:** Mirror the formula client-side and apply a 5-minute approval buffer.
+**Consequences:** Avoids redeploying the core lending pool contract while preventing transaction reverts caused by time advancing between token approval and transaction execution.

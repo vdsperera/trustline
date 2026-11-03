@@ -140,19 +140,47 @@ TASK-001 → TASK-002 → TASK-003 → TASK-004 → TASK-005 → TASK-006 → TA
 
 ---
 
+## Layer 7: Frontend & DApp Client
+
+**ID:** TASK-010
+**Title:** Build role-based glassmorphic Web3 frontend & custom error decoding
+**Layer:** 7
+**Linked stories:** All
+**Linked component:** Trustline Frontend Application
+**Depends on:** TASK-007, TASK-009
+**Input:** Deployed contracts on Base/Base Sepolia, ABIs.
+**Output:** React + Vite application with role-based dashboards (Owner vs Borrower), live wallet connection, interest calculation, and EVM 4-byte custom error decoding (`parseError`).
+**Acceptance condition:** Users can connect wallets, view role-specific controls, borrow/repay, deposit/withdraw, and see friendly error messages on reverts.
+**Estimated size:** L
+**Risk / notes:** Time synchronization between client and EVM timestamp handled via allowance buffer.
+
+**ID:** TASK-011
+**Title:** Implement Whitelisted Friends Directory, dynamic capacity, LKR conversions, and mobile UX hardening
+**Layer:** 7
+**Linked stories:** US-001, US-002, US-006
+**Linked component:** Trustline Frontend Application
+**Depends on:** TASK-010
+**Input:** Contract events (`WhitelistUpdated`), user feedback.
+**Output:** Historical event log scanner for automatic friend discovery, local alias mapping with inline editing, 1-click whitelist revocation, active loan analytics per borrower, custom LKR exchange rate tracking, dynamic deposit headroom capacity helpers, and mobile WebView decimal inputs (`inputMode="decimal"` with `isValidNumericInput`).
+**Acceptance condition:** Historical whitelisted addresses load automatically on wallet connection; directory lists active loans with LKR conversions; mobile keyboards do not freeze on backspace; unit tests for all utilities pass.
+**Estimated size:** M
+**Risk / notes:** Fully backward-compatible; uses 0 extra gas.
+
+---
+
 ## Traceability & Coverage Matrix
 
 ### Stories × Tasks
 | Story | Description | Implementing Tasks |
 |-------|-------------|-------------------|
-| US-001 | Manage whitelist | TASK-002, TASK-003, TASK-004 |
-| US-002 | Deposit liquidity | TASK-002, TASK-003, TASK-005 |
-| US-003 | Withdraw liquidity | TASK-002, TASK-003, TASK-005 |
-| US-004 | Borrow USDT | TASK-002, TASK-003, TASK-006 |
-| US-005 | Configure interest | TASK-002, TASK-003, TASK-004 |
-| US-006 | Accrue interest | TASK-002, TASK-003, TASK-007 |
-| US-007 | Repay loan | TASK-002, TASK-003, TASK-007 |
-| US-008 | Emergency pause | TASK-002, TASK-003, TASK-004 |
+| US-001 | Manage whitelist | TASK-002, TASK-003, TASK-004, TASK-010, TASK-011 |
+| US-002 | Deposit liquidity | TASK-002, TASK-003, TASK-005, TASK-010, TASK-011 |
+| US-003 | Withdraw liquidity | TASK-002, TASK-003, TASK-005, TASK-010 |
+| US-004 | Borrow USDT | TASK-002, TASK-003, TASK-006, TASK-010, TASK-011 |
+| US-005 | Configure interest | TASK-002, TASK-003, TASK-004, TASK-010 |
+| US-006 | Accrue interest | TASK-002, TASK-003, TASK-007, TASK-010, TASK-011 |
+| US-007 | Repay loan | TASK-002, TASK-003, TASK-007, TASK-010 |
+| US-008 | Emergency pause | TASK-002, TASK-003, TASK-004, TASK-010 |
 
 ### Components × Tasks
 | Component | Implementing Tasks |
@@ -160,6 +188,7 @@ TASK-001 → TASK-002 → TASK-003 → TASK-004 → TASK-005 → TASK-006 → TA
 | TrustlineLendingPool | TASK-002, TASK-003, TASK-005, TASK-006, TASK-007, TASK-009 |
 | AccessController | TASK-002, TASK-003, TASK-004 |
 | USDT Token (External) | TASK-008 (integration script) |
+| Trustline Frontend Application | TASK-010, TASK-011 |
 
 ### Risk Flags × Tasks
 | Risk Flag | Mitigation Task |
