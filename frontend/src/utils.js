@@ -128,3 +128,8 @@ export const validateDepositAmount = (amount, remainingCapacity) => {
   }
   return { valid: true };
 };
+
+export const isValidNumericInput = (val) => {
+  if (val === undefined || val === null || val === '') return true;
+  return /^\d*\.?\d*$/.test(String(val));
+};

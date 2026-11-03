@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { parseError, calculateRemainingCapacity, validateDepositAmount } from './utils.js';
+import { parseError, calculateRemainingCapacity, validateDepositAmount, isValidNumericInput } from './utils.js';
 
 test('parseError - extracts from basic e.message', () => {
     const error = { message: "execution reverted: ERC20: transfer amount exceeds balance" };
@@ -101,4 +101,32 @@ test('validateDepositAmount - rejects empty, null, or non-numeric inputs', () =>
     assert.strictEqual(validateDepositAmount(null, '8').valid, false);
     assert.strictEqual(validateDepositAmount(undefined, '8').valid, false);
     assert.strictEqual(validateDepositAmount('abc', '8').valid, false);
+});
+
+test('isValidNumericInput - allows empty string for clearing/backspacing', () => {
+    assert.strictEqual(isValidNumericInput(''), true);
+    assert.strictEqual(isValidNumericInput(null), true);
+    assert.strictEqual(isValidNumericInput(undefined), true);
+});
+
+test('isValidNumericInput - allows valid integer and decimal numbers', () => {
+    assert.strictEqual(isValidNumericInput('5'), true);
+    assert.strictEqual(isValidNumericInput('20'), true);
+    assert.strictEqual(isValidNumericInput('0.5'), true);
+    assert.strictEqual(isValidNumericInput('333.14'), true);
+    assert.strictEqual(isValidNumericInput('.5'), true);
+});
+
+test('isValidNumericInput - allows intermediate typing states like trailing dot', () => {
+    assert.strictEqual(isValidNumericInput('5.'), true);
+    assert.strictEqual(isValidNumericInput('0.'), true);
+});
+
+test('isValidNumericInput - rejects invalid characters, multiple dots, and negative signs', () => {
+    assert.strictEqual(isValidNumericInput('abc'), false);
+    assert.strictEqual(isValidNumericInput('5a'), false);
+    assert.strictEqual(isValidNumericInput('5.5.5'), false);
+    assert.strictEqual(isValidNumericInput('-5'), false);
+    assert.strictEqual(isValidNumericInput('+5'), false);
+    assert.strictEqual(isValidNumericInput('1e5'), false);
 });

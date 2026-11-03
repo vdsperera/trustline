@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { ethers } from 'ethers'
 import './index.css'
 import abis from './abis.json'
-import { parseError, calculateRemainingCapacity, validateDepositAmount } from './utils.js'
+import { parseError, calculateRemainingCapacity, validateDepositAmount, isValidNumericInput } from './utils.js'
 
 function App() {
   const [provider, setProvider] = useState(null)
@@ -73,6 +73,13 @@ function App() {
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id))
     }, 4000)
+  }
+
+  const handleNumericInput = (setter) => (e) => {
+    const val = e.target.value
+    if (isValidNumericInput(val)) {
+      setter(val)
+    }
   }
 
   const connectWallet = async () => {
@@ -504,11 +511,11 @@ function App() {
                 <div className="rate-setting-bar">
                   <span className="rate-label">Rate: 1 USDT =</span>
                   <input 
-                    type="number" 
-                    step="0.01" 
-                    min="1" 
+                    type="text" 
+                    inputMode="decimal"
+                    autoComplete="off"
                     value={rateInput}
-                    onChange={(e) => setRateInput(e.target.value)}
+                    onChange={handleNumericInput(setRateInput)}
                     className="rate-input"
                     placeholder="333.14"
                   />
@@ -516,7 +523,7 @@ function App() {
                   <button 
                     className="btn btn-secondary btn-sm"
                     onClick={handleSaveRate}
-                    disabled={!rateInput || Number(rateInput) <= 0 || rateInput === lkrRate}
+                    disabled={!rateInput || !(Number(rateInput) > 0) || rateInput === lkrRate}
                   >
                     Save
                   </button>
@@ -528,12 +535,12 @@ function App() {
                   <h3 style={{marginBottom: '1rem', fontSize: '1rem', color: 'var(--text-muted)'}}>Liquidity Management</h3>
                   <div className="input-group">
                     <input 
-                      type="number" 
-                      min="0.1"
-                      step="0.1"
+                      type="text" 
+                      inputMode="decimal"
+                      autoComplete="off"
                       placeholder="Amount (USDT)" 
                       value={depositAmount}
-                      onChange={(e) => setDepositAmount(e.target.value)}
+                      onChange={handleNumericInput(setDepositAmount)}
                     />
                     <button 
                       className="btn btn-secondary btn-max" 
@@ -550,7 +557,7 @@ function App() {
                       disabled={
                         loading || 
                         !depositAmount || 
-                        Number(depositAmount) <= 0 || 
+                        !(Number(depositAmount) > 0) || 
                         (Number(remainingDepositCapacity) > 0 && Number(depositAmount) > Number(remainingDepositCapacity)) ||
                         Number(remainingDepositCapacity) <= 0
                       }
@@ -756,14 +763,14 @@ function App() {
                   <h3 style={{fontSize: '1.5rem', marginBottom: '1.5rem'}}>Request a Loan</h3>
                   <div className="input-group" style={{maxWidth: '300px', margin: '0 auto'}}>
                     <input 
-                      type="number" 
-                      min="0.1"
-                      step="0.1"
+                      type="text" 
+                      inputMode="decimal"
+                      autoComplete="off"
                       placeholder="Amount (USDT)" 
                       value={borrowAmount}
-                      onChange={(e) => setBorrowAmount(e.target.value)}
+                      onChange={handleNumericInput(setBorrowAmount)}
                     />
-                    <button className="btn" onClick={handleBorrow} disabled={loading || !borrowAmount || Number(borrowAmount) <= 0 || Number(borrowAmount) > Number(poolLiquidity)}>
+                    <button className="btn" onClick={handleBorrow} disabled={loading || !borrowAmount || !(Number(borrowAmount) > 0) || Number(borrowAmount) > Number(poolLiquidity)}>
                       {loading ? <div className="spinner"></div> : "Borrow"}
                     </button>
                   </div>
