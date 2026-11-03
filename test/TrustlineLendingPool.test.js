@@ -51,6 +51,44 @@ describe("TrustlineLendingPool", function () {
       await pool.setInterestRate(300); // 3%
       expect(await pool.globalDailyInterestRate()).to.equal(300n);
     });
+
+    describe("Two-Step Ownership Transfer (Ownable2Step)", function () {
+      it("Should nominate pending owner without immediately transferring ownership", async function () {
+        await pool.connect(owner).transferOwnership(user1.address);
+        expect(await pool.owner()).to.equal(owner.address);
+        expect(await pool.pendingOwner()).to.equal(user1.address);
+      });
+
+      it("Should prevent non-pending owners from calling acceptOwnership", async function () {
+        await pool.connect(owner).transferOwnership(user1.address);
+        await expect(pool.connect(user2).acceptOwnership())
+          .to.be.revertedWithCustomError(pool, "OwnableUnauthorizedAccount");
+      });
+
+      it("Should successfully transfer ownership when pending owner accepts", async function () {
+        await pool.connect(owner).transferOwnership(user1.address);
+        await pool.connect(user1).acceptOwnership();
+
+        expect(await pool.owner()).to.equal(user1.address);
+        expect(await pool.pendingOwner()).to.equal(hre.ethers.ZeroAddress);
+      });
+
+      it("Should allow current owner to overwrite pending owner nomination", async function () {
+        await pool.connect(owner).transferOwnership(user1.address);
+        expect(await pool.pendingOwner()).to.equal(user1.address);
+
+        await pool.connect(owner).transferOwnership(user2.address);
+        expect(await pool.pendingOwner()).to.equal(user2.address);
+
+        // user1 cannot accept anymore
+        await expect(pool.connect(user1).acceptOwnership())
+          .to.be.revertedWithCustomError(pool, "OwnableUnauthorizedAccount");
+
+        // user2 can accept
+        await pool.connect(user2).acceptOwnership();
+        expect(await pool.owner()).to.equal(user2.address);
+      });
+    });
   });
 
   describe("Deposit & Withdraw", function () {
