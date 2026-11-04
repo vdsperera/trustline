@@ -1,0 +1,35 @@
+Business Source License 1.1
+
+Parameters
+
+Licensor:
+Trustline Protocol
+
+Licensed Work:
+The Trustline lending protocol smart contracts and codebase, including any updates or modifications.
+
+Additional Use Grant:
+You may run the Licensed Work on public and private blockchain testnets (such as Base Sepolia and local development networks) for testing, development, and integration purposes. Any commercial use or deployment to a blockchain mainnet (including Base Mainnet or any other EVM-compatible mainnet) requires a separate commercial license from Licensor.
+
+Change Date:
+2029-11-04
+
+Change License:
+GNU General Public License v3.0 or later (GPL-3.0-or-later)
+
+Notice: The Business Source License (this License) is not an Open Source License. However, the Licensed Work will convert to an Open Source License on the Change Date.
+
+Terms
+
+The Licensor hereby grants you the right to copy, modify, create derivative works, redistribute, and make non-production use of the Licensed Work. The Licensor may make an Additional Use Grant, above, permitting limited production use.
+
+Effective on the Change Date, or the fourth anniversary of the first publicly available distribution of a specific version of the Licensed Work under this License, whichever comes first, the Licensor hereby grants you rights under the terms of the Change License, and the rights granted in the paragraph above terminate.
+
+If your use of the Licensed Work does not comply with the requirements currently in effect under this License, you must purchase a commercial license from the Licensor, its affiliated entities, or authorized resellers, or you must immediately cease using the Licensed Work.
+
+All copies of the Licensed Work, or any derivative works thereof, in source code form must include this License, including the Parameters above and the following trademark notice:
+
+Business Source License 1.1: Licensing terms are defined at mariadb.com/bsl11
+
+To the extent permitted by applicable law, the Licensed Work is provided on an "as is" basis. Licensor hereby disclaims all warranties and conditions, express or implied, including (without limitation) any warranties of merchantability or fitness for a particular purpose, non-infringement, or title. Licensor shall not be liable for any damages (including direct, indirect, special, incidental, or consequential damages) arising out of or related to this License or the use of the Licensed Work.
+
